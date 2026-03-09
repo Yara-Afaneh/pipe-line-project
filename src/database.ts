@@ -1,16 +1,15 @@
-import { Pool } from 'pg';
-import dotenv from 'dotenv';
+import { Pool } from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 export const pool = new Pool({
-  user: 'user',
-  host: 'localhost',
-  database: 'webhook_db',
-  password: 'password',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
 });
 
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL');
+pool.connect((err) => {
+  if (err) {
+    console.error("❌  connection error:", err.message);
+  }
+  console.log("✅ connected successfully");
 });

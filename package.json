@@ -1,16 +1,16 @@
 {
   "name": "finalpro",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "tsx ./src/index.ts"
+    "start": "tsc && node dist/index.js",
+    "dev": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.5",

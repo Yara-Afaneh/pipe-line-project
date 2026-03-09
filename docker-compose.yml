@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: webhook_db_container
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: webhook_db
     ports:
