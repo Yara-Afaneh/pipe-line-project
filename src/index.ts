@@ -1,18 +1,22 @@
 import express from "express";
 import { pool } from "./database.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
+import { processJobs } from "./worker.js";
 
 const app = express();
 const PORT = 3000;
 
-pool.connect((err, client, release) => {
-  if (err) {
-    return console.error("❌  connection error:", err.message);
-  }
-  console.log("✅ connected successfully");
-  release();
+app.use(express.json());
+
+pool.connect((err) => {
+  if (err) console.error("❌ Database Connection Error:", err.message);
+  else console.log("✅ Connected to Database Successfully!");
 });
+app.use("/webhook", webhookRoutes);
+setInterval(processJobs, 10000);
+
 app.get("/", (req, res) => {
-  res.send("Hello Webhook Pipeline Service is Running!");
+  res.send("Webhook Pipeline Service is Running! 🚀");
 });
 
 app.listen(PORT, () => {
