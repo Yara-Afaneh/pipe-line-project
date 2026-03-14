@@ -2,6 +2,7 @@ import express from "express";
 import { pool } from "./database.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
+import "dotenv/config";
 
 import { processJobs } from "./worker.js";
 
@@ -17,7 +18,7 @@ pool.connect((err) => {
 app.use("/webhook", webhookRoutes);
 setInterval(processJobs, 10000);
 
-app.use('/stats', statsRoutes);
+app.use("/stats", statsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Webhook Pipeline Service is Running! 🚀");
