@@ -3,8 +3,6 @@ import { jobs } from "./db/schema.js";
 import { eq } from "drizzle-orm";
 
 export const processJobs = async () => {
-  console.log("🔍 Checking for pending jobs...");
-
   const pendingJobs = await db
     .select()
     .from(jobs)
@@ -17,18 +15,35 @@ export const processJobs = async () => {
 
   for (const job of pendingJobs) {
     try {
-      console.log(`⏳ Processing Job ID: ${job.id}...`);
+      const payload = job.data as any;
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log(
+        `🚀 [Job ID: ${job.id.substring(0, 8)}] Processing started...`,
+      );
 
-      console.log(`✅ Job ${job.id} processed successfully!`);
+      if (payload.type === "new_task") {
+        console.log(
+          `🏗️  TASK ACTION: Engineering team notified about: "${payload.description}"`,
+        );
+      } else if (payload.type === "notification") {
+        console.log(
+          `🔔 NOTIFICATION ACTION: Sending alert: "${payload.message}"`,
+        );
+      } else {
+        console.log(
+          `❓ UNKNOWN ACTION: Received type "${payload.type}", no specific logic defined.`,
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await db
         .update(jobs)
         .set({ status: "completed" })
         .where(eq(jobs.id, job.id));
+      console.log(`✅ Job ${job.id.substring(0, 8)} is now COMPLETED.`);
     } catch (error) {
-      console.error(`❌ Failed to process job ${job.id}:`, error);
+      console.error(`❌ Error processing job ${job.id}:`, error);
       await db
         .update(jobs)
         .set({ status: "failed" })
