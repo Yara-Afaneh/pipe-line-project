@@ -1,41 +1,101 @@
-# 🚀 Yara's Background Task Processor (Webhook System)
+Markdown
 
-A robust and secure Node.js backend system designed to receive data via Webhooks and process tasks asynchronously in the background. Built with focus on scalability, security, and clean architecture.
+# 🚀 Webhook-Driven Task Processing Pipeline
 
-## ✨ Key Features
-- **Security-First:** Implemented API Key authentication to protect endpoints from unauthorized access.
-- **Smart Background Worker:** An automated worker that polls the database for pending jobs and processes them based on their type.
-- **Observability:** A dedicated `/stats` dashboard providing real-time insights into system health (Pending, Completed, and Failed jobs).
-- **Clean Architecture:** Modular routing and modern database management using Drizzle ORM.
+A robust, asynchronous task processing system built with **TypeScript**, **Node.js**, and **PostgreSQL**. This service functions as a simplified automation engine (similar to Zapier) where inbound webhooks trigger customizable data processing actions and deliver results to multiple subscribers.
+
+---
+
+## 🏗️ Architecture & Design Decisions
+
+The system follows a **Producer-Consumer** architecture to ensure scalability and reliability:
+
+1.  **Ingestion Layer (The Producer):** Fast Express.js routes that validate incoming webhooks and queue them immediately into the database. This ensures a low latency response (202 Accepted) for the webhook source.
+2.  **Processing Layer (The Worker):** A background worker process that polls the database for `pending` jobs, applies the requested transformation logic, and handles multi-destination delivery.
+3.  **Data Layer:** PostgreSQL managed via **Drizzle ORM** for type-safe queries. I implemented an automated schema initialization strategy using `init.sql` to ensure the environment is consistent across different machines.
+
+---
 
 ## 🛠️ Tech Stack
+
 - **Language:** TypeScript
-- **Backend:** Express.js
+- **Runtime:** Node.js
+- **Framework:** Express.js
 - **Database:** PostgreSQL
 - **ORM:** Drizzle ORM
-- **Environment:** Node.js
+- **Tools:** Axios (for delivery), Dotenv, Nodemon
+
+---
+
+## 📊 Database Schema
+
+The system is built around 4 core entities:
+
+- **Pipelines:** Defines the source and the type of action to be performed.
+- **Subscribers:** Stores the destination URLs for each pipeline.
+- **Jobs:** The queue of incoming tasks and their current processing status.
+- **Deliveries:** A detailed log of each delivery attempt to subscribers, providing audit trails and error tracking.
+
+---
+
+## ✨ Processing Actions
+
+The worker supports three distinct processing "Actions" before delivering data:
+
+1.  `UPPERCASE`: Converts all string values in the JSON payload to uppercase.
+2.  `TRANSFORM`: Injects system metadata and processing timestamps into the payload.
+3.  `CLEANSE`: Automatically removes any keys with `null` or `undefined` values to ensure clean data delivery.
+
+---
 
 ## 🚀 Getting Started
 
-1. **Clone the repository:**
-   ```bash
-   git clone [YOUR_REPOSITORY_LINK]
-Install dependencies:
+### 1. Prerequisites
 
-Bash
+- Node.js (v18+)
+- PostgreSQL database
+
+### 2. Installation
+
+```bash
 npm install
-Setup Environment Variables:
-Create a .env file in the root directory and add:
+3. Environment Setup
+Create a .env file in the root directory:
 
-DATABASE_URL=your_postgresql_connection_string
-WEBHOOK_SECRET=your_secure_api_key
-Run the Project:
-
+مقتطف الرمز
+DATABASE_URL=postgres://your_user:your_password@localhost:5432/your_db
+WEBHOOK_SECRET=YourSecureSecretKey
+PORT=3000
+4. Running the Project
 Bash
+# Development mode
 npm run dev
-📊 API Endpoints
-POST /webhook: Receives incoming data. (Requires x-api-key in the header).
+📡 API Reference
+Create a Pipeline
+POST /pipelines
 
-GET /stats: Provides a JSON summary of job statistics.
+JSON
+{
+  "name": "Data Transformer",
+  "actionType": "UPPERCASE",
+  "subscriberUrls": ["[https://webhook.site/your-id](https://webhook.site/your-id)"]
+}
+Inbound Webhook
+POST /webhook/:pipelineId
 
-Developed by Yara Afaneh.
+Header: x-api-key: YourSecureSecretKey
+
+System Stats
+GET /stats
+
+Returns an overview of job statuses (pending, completed, failed).
+
+🛡️ Reliability & Error Handling
+Non-blocking Execution: The worker processes tasks independently, so a slow subscriber won't affect the ingestion of new webhooks.
+
+Graceful Failures: If a delivery fails (e.g., 404 or 500 error), the system captures the exact error message and updates the job status without crashing.
+
+Security: Ingestion and Stats endpoints are protected via API Key validation.
+
+Developed by: Yara Afaneh
+```

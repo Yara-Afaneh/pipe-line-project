@@ -56,3 +56,4 @@ export const deliveries = pgTable("deliveries", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
