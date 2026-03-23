@@ -13,7 +13,7 @@ The system follows a **Producer-Consumer** architecture to ensure scalability an
 1.  **Ingestion Layer (The Producer):** Fast Express.js routes that validate incoming webhooks and queue them immediately into the database. This ensures a low latency response (202 Accepted) for the webhook source.
 2.  **Processing Layer (The Worker):** A background worker process that polls the database for `pending` jobs, applies the requested transformation logic, and handles multi-destination delivery.
 3.  **Data Layer:** PostgreSQL managed via **Drizzle ORM** for type-safe queries. I implemented an automated schema initialization strategy using `init.sql` to ensure the environment is consistent across different machines.
-
+ط
 ---
 
 ## 🛠️ Tech Stack
@@ -62,7 +62,6 @@ npm install
 3. Environment Setup
 Create a .env file in the root directory:
 
-مقتطف الرمز
 DATABASE_URL=postgres://your_user:your_password@localhost:5432/your_db
 WEBHOOK_SECRET=YourSecureSecretKey
 PORT=3000
